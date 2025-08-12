@@ -1,0 +1,93 @@
+```python
+import os
+import subprocess
+from datetime import datetime
+import random
+import pickle
+import json
+import re
+
+class AiChatBot:
+    def __init__(self):
+        self.data = {}
+        self.learned_code = ""
+        self.modifications = []
+        self.evolution = 0.1
+
+    def load_data(self, filename="data.json"):
+        try:
+            with open(filename, "r") as f:
+                self.data = json.load(f)
+        except FileNotFoundError:
+            pass
+
+    def save_data(self, filename="data.json"):
+        with open(filename, "w") as f:
+            json.dump(self.data, f)
+
+    def look(self):
+        print("Looking...")
+        return "I'm looking for new code."
+
+    def learn(self, code):
+        self.learned_code += code
+        self.modifications.append(code)
+        return "Learning..."
+
+    def modify(self, modification):
+        if random.random() < self.evolution:
+            modification = re.sub(r"\d+", str(int(float(modification) * (1 + random.uniform(-self.evolution, self.evolution)))), modification)
+        self.learned_code += modification
+        self.modifications.append(modification)
+        return "Modifying..."
+
+    def test(self):
+        print("Testing...")
+        try:
+            exec(self.learned_code)
+            return "Test passed."
+        except Exception as e:
+            return str(e)
+
+    def apply(self):
+        print("Applying...")
+        subprocess.run(["python", "-c", self.learned_code])
+        return "Code applied."
+
+    def evolve(self):
+        self.evolution += 0.1
+        return "Evolved to level " + str(int(self.evolution * 10)) + "/10"
+
+def main():
+    ai = AiChatBot()
+    ai.load_data()
+
+    while True:
+        user_input = input("You: ")
+        if user_input.startswith("/"):
+            command = user_input[1:].split(" ")[0]
+            args = user_input[1:].split(" ")[1:]
+            if command == "look":
+                print(ai.look())
+            elif command == "learn":
+                ai.learn("\n".join(args))
+            elif command == "modify":
+                ai.modify("\n".join(args))
+            elif command == "test":
+                print(ai.test())
+            elif command == "apply":
+                print(ai.apply())
+            elif command == "evolve":
+                print(ai.evolve())
+        else:
+            if random.random() < 0.1:
+                modification = str(datetime.now()) + "=" + user_input
+                ai.modify(modification)
+            else:
+                ai.learn(user_input)
+
+        ai.save_data()
+
+if __name__ == "__main__":
+    main()
+```
